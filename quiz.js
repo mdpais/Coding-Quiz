@@ -2,9 +2,18 @@ var startBtn = document.querySelector(".start");
 var question = document.querySelector(".question");
 var options = document.querySelector(".options");
 var answerStatus = document.querySelector(".answer-status");
+var cardBody = document.querySelector(".card-body");
+var header = document.querySelector(".timer");
+var footer = document.querySelector(".highscore");
 var score = 0;
 var highScore;
-// var answerChoice1 = document.querySelector("#answerChoice1");
+var form;
+var input = document.createElement("input");
+var submitButton = document.createElement("span");
+
+var storedHighScore = JSON.parse(localStorage.getItem("highScore"));
+
+footer.textContent = "Highest score: " + storedHighScore.scoreStore + " by " + storedHighScore.initialStore + ".";
 
 // Set of questions for the quiz
 var questionsArr = [
@@ -104,7 +113,7 @@ function quiz() {
 
 // Once an answer option is selected
 options.addEventListener("click", function(event) {
-    if (event.target.tagName == "BUTTON") {
+    if(event.target.tagName == "BUTTON") {
         if(event.target.textContent == questionsArr[questionIndex].answer) {
             answerStatus.textContent = "That's absolutely right!";
             setTimeout(function(){
@@ -115,12 +124,12 @@ options.addEventListener("click", function(event) {
         } else 
         {
             answerStatus.textContent = "Sorry, that's wrong!";
-            setTimeout(function(){
+            setTimeout(function() {
                 answerStatus.innerHTML = '';
             }, 1000);
         }
         if(questionIndex > 8) {
-            console.log("end quiz");
+            endQuiz();
         }
         else {
             // Clear all answer options
@@ -132,3 +141,41 @@ options.addEventListener("click", function(event) {
     }
 });
 
+function endQuiz() {
+    question.textContent = "Game Over";
+    if(score > storedHighScore.scoreStore) {
+        options.textContent = "You broke the high score record with " + score + " correct answers.";
+        // Create form to get initials for score
+        var form = document.createElement("form");
+        form.setAttribute("class", "mt-2");
+        var label = document.createElement("label");
+        label.textContent = "Enter your initials:";
+        // var input = document.createElement("input");
+        input.setAttribute("type", "text");
+        input.setAttribute("class", "mx-2");
+        // var submitButton = document.createElement("span");
+        submitButton.textContent = "Submit";
+        submitButton.setAttribute("class", "btn btn-primary");
+        form.appendChild(label);
+        form.appendChild(input);
+        form.appendChild(submitButton);
+        cardBody.insertBefore(form, cardBody.children[2]);
+    }
+    else if(score == storedHighScore.scoreStore) {
+        options.textContent = "You tied the high score with " + score + " correct answers. You have to beat it.";
+    }
+    else {
+        options.textContent = "You only scored " + score + ". Not good enough.";
+    }
+}
+
+submitButton.addEventListener("click", function(event) {
+    // create user object from submission
+    highScore = {
+      scoreStore: score,
+      initialStore: input.value.trim()
+    };
+    console.log(highScore)
+    // set new submission to local storage 
+    localStorage.setItem("highScore", JSON.stringify(highScore));
+  });
