@@ -2,7 +2,7 @@
 
 ##Description
 
-A quirky little quiz to test your coding knowledge
+A quirky little quiz to test your coding knowledge and try to get the highest score
 - The quiz starts with a timer set to 1 minute
 - The timer starts counting down as soon as the first question is presented
 - Each incorrect answer deducts 10 seconds from the clock

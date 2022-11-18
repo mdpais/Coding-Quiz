@@ -5,6 +5,7 @@ var answerStatus = document.querySelector(".answer-status");
 var cardBody = document.querySelector(".card-body");
 var header = document.querySelector(".timer");
 var footer = document.querySelector(".highscore");
+var timeLeft;
 
 var storedHighScore = JSON.parse(localStorage.getItem("highScore"));
 if(storedHighScore == null) {
@@ -86,17 +87,23 @@ var questionsArr = [
     }
 ];
 
+var timeInterval;
+
 // Start the quiz
 startBtn.addEventListener("click", function() {
     // Remove the start button
     startBtn.remove();
+    timeInterval = setInterval(countdown, 1000);
     quiz();
 });
 
 var questionIndex = 0;
+timeLeft = 60;
 
 // Quiz code
 function quiz() {
+    // Start timer
+    countdown();
     // Display question
     question.textContent = questionsArr[questionIndex]["question"];
     // Create buttons and display answer options
@@ -116,26 +123,30 @@ options.addEventListener("click", function(event) {
         if(event.target.textContent == questionsArr[questionIndex].answer) {
             answerStatus.textContent = "That's absolutely right!";
             setTimeout(function(){
-                answerStatus.innerHTML = '';
+                answerStatus.innerHTML = "";
             }, 1000);
             score = score + 1;
-            console.log("the score is " + score)
         } else 
         {
             answerStatus.textContent = "Sorry, that's wrong!";
             setTimeout(function() {
-                answerStatus.innerHTML = '';
+                answerStatus.innerHTML = "";
             }, 1000);
+            timeLeft = timeLeft - 10;
+            countdown();
         }
         if(questionIndex > 8) {
             endQuiz();
         }
-        else {
+        else if (timeLeft > 0) {
             // Clear all answer options
             options.innerHTML = "";
             // Run quiz code with next question
             questionIndex++;
             quiz();
+        }
+        else {
+            endQuiz();
         }
     }
 });
@@ -148,6 +159,8 @@ form.setAttribute("class", "mt-2 form");
 var submitButton = document.createElement("span");
 
 function endQuiz() {
+    // question.textContent = "";
+    // options.textContent = "";
     storedHighScore = JSON.parse(localStorage.getItem("highScore"));
     question.textContent = "Game Over";
     if(score > storedHighScore.scoreStore) {
@@ -195,9 +208,9 @@ submitButton.addEventListener("click", function() {
       scoreStore: score,
       initialStore: input.value.trim()
     };
-    console.log(highScore)
     // set new submission to local storage 
     localStorage.setItem("highScore", JSON.stringify(highScore));
+    // Display high score, reset button and restart quiz button
     question.textContent = "Highest Score achieved in this Game";
     options.textContent = highScore.scoreStore + " by " + highScore.initialStore;
     footer.textContent = "Highest score: " + highScore.scoreStore + " by " + highScore.initialStore;
@@ -215,6 +228,8 @@ submitButton.addEventListener("click", function() {
     form.remove();
     questionIndex = 0;
     score = 0;
+    timeLeft = 60;
+    timeInterval = setInterval(countdown, 1000);
     quiz();
   });
 
@@ -227,3 +242,14 @@ submitButton.addEventListener("click", function() {
       options.textContent = highScore.scoreStore + " by " + highScore.initialStore;
       footer.textContent = "Highest score: " + highScore.scoreStore + " by " + highScore.initialStore;
   });
+
+  function countdown() {
+      if (timeLeft > 0) {
+        header.textContent = timeLeft;
+        timeLeft--;
+      } else {
+        header.textContent = "";
+        clearInterval(timeInterval);
+        endQuiz();
+      }
+  }
